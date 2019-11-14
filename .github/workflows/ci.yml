@@ -14,6 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -45,3 +47,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: dist/webtorrent-desktop_0.21.0_amd64.deb
         asset_name: webtorrent-desktop_0.21.0_amd64.deb
+        asset_content_type: application/octet-stream
