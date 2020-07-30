@@ -59,7 +59,7 @@
     "gh-release": "^3.5.0",
     "minimist": "^1.2.5",
     "nodemon": "^2.0.4",
-    "open": "^7.0.4",
+    "open": "^7.1.0",
     "plist": "^3.0.1",
     "pngjs": "^5.0.0",
     "run-series": "^1.1.8",
