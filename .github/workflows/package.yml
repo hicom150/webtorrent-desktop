@@ -20,4 +20,6 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: linux
-        path: dist/*.{deb,rpm}
+        path: |
+          dist/*.deb
+          dist/*.rpm
