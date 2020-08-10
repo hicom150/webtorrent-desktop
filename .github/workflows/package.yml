@@ -20,7 +20,10 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: linux
-        path: dist/*.[deb,rpm,zip]
+        path: |
+          dist/*.deb
+          dist/*.rpm
+          dist/*.zip
   package_macos:
     runs-on: macos-latest
     steps:
@@ -39,7 +42,9 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: macos
-        path: dist/*.[dmg,zip]
+        path: |
+          dist/*.dmg
+          dist/*.zip
   package_windows:
     runs-on: windows-latest
     steps:
@@ -58,5 +63,8 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: windows
-        path: dist/*.[exe,nupkg,zip]
+        path: |
+          dist/*.exe
+          dist/*.nupkg
+          dist/*.zip
         
