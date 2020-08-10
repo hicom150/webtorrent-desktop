@@ -2,7 +2,7 @@ name: package
 on: 
   workflow_dispatch:
 jobs:
-  package:
+  package_linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,4 +20,42 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: linux
-        path: dist/*.{deb,rpm}
+        path: dist/*.{deb,rpm,zip}
+  package_macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: npm install
+    - run: npm run package -- darwin
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos
+        path: dist/*.{dmg,zip}
+  package_windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+    - uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - run: npm install
+    - run: npm run package -- win32
+    - uses: actions/upload-artifact@v2
+      with:
+        name: windows
+        path: dist/*.{exe,nupkg,zip}
