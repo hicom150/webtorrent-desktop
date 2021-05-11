@@ -340,13 +340,13 @@ function renderAudioMetadata (state) {
     format.push(fileSummary.audioInfo.format.codec)
   }
   if (fileSummary.audioInfo.format.bitrate) {
-    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbps') // 128 kbps
+    format.push(Math.round(fileSummary.audioInfo.format.bitrate / 1000) + ' kbit/s') // 128 kbit/s
   }
   if (fileSummary.audioInfo.format.sampleRate) {
     format.push(Math.round(fileSummary.audioInfo.format.sampleRate / 100) / 10 + ' kHz')
   }
   if (fileSummary.audioInfo.format.bitsPerSample) {
-    format.push(fileSummary.audioInfo.format.bitsPerSample + ' bit')
+    format.push(fileSummary.audioInfo.format.bitsPerSample + '-bit')
   }
   if (format.length > 0) {
     elems.push((
@@ -427,14 +427,67 @@ function renderCastScreen (state) {
 
   const isStarting = state.playing.location.endsWith('-pending')
   const castName = state.playing.castName
+  const fileName = state.getPlayingFileSummary().name || ''
   let castStatus
   if (isCast && isStarting) castStatus = 'Connecting to ' + castName + '...'
   else if (isCast && !isStarting) castStatus = 'Connected to ' + castName
   else castStatus = ''
 
+  const prog = state.getPlayingTorrentSummary().progress || {}
+
   // Show a nice title image, if possible
   const style = {
     backgroundImage: cssBackgroundImagePoster(state)
+  }
+
+  function renderEta (total, downloaded) {
+    const missing = (total || 0) - (downloaded || 0)
+    const downloadSpeed = prog.downloadSpeed || 0
+    if (downloadSpeed === 0 || missing === 0) return
+
+    const rawEta = missing / downloadSpeed
+    const hours = Math.floor(rawEta / 3600) % 24
+    const minutes = Math.floor(rawEta / 60) % 60
+    const seconds = Math.floor(rawEta % 60)
+
+    const hoursStr = hours ? hours + ' h' : ''
+    const minutesStr = (hours || minutes) ? minutes + ' min' : ''
+    const secondsStr = seconds + ' s'
+
+    return (<span>{hoursStr} {minutesStr} {secondsStr} remaining</span>)
+  }
+
+  function renderDownloadProgress () {
+    if (!prog.files) return
+
+    const fileProg = prog.files[state.playing.fileIndex]
+    const fileProgress = fileProg.numPiecesPresent / fileProg.numPieces
+    const fileLength = state.getPlayingFileSummary().length
+    const fileDownloaded = fileProgress * fileLength
+
+    const progress = Math.round(100 * fileProgress)
+    const total = prettyBytes(fileLength)
+    const completed = prettyBytes(fileDownloaded)
+
+    const downloadSpeed = prettyBytes(prog.downloadSpeed || 0)
+    const uploadSpeed = prettyBytes(prog.uploadSpeed || 0)
+
+    let sizes
+    if (fileProgress < 1) {
+      sizes = <span> | {completed} / {total}</span>
+    } else {
+      sizes = <span> | {completed}</span>
+    }
+
+    return (
+      <div key='download-progress'>
+        <span className='progress'>{progress}% downloaded {sizes}</span>
+        <br />
+        <span>↓ {downloadSpeed}/s ↑ {uploadSpeed}/s | {prog.numPeers || 0} peer(s)</span>
+        <br />
+        {renderEta(fileLength, fileDownloaded)}
+      </div>
+    )
   }
 
   return (
@@ -443,6 +496,8 @@ function renderCastScreen (state) {
         <i className='icon'>{castIcon}</i>
         <div key='type' className='cast-type'>{castType}</div>
         <div key='status' className='cast-status'>{castStatus}</div>
+        <div key='name' className='name'>{fileName}</div>
+        {renderDownloadProgress()}
       </div>
     </div>
   )
